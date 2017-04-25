@@ -1,7 +1,8 @@
-vendor/
-build/
-composer.lock
-
+/.git/
+/.DS_Store
+/composer.lock
+/vendor/
+/build/
 
 .project
 .settings
