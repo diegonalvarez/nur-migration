@@ -32,15 +32,9 @@
     "phpunit/phpunit": "~7.0",
     "mockery/mockery": "~1.0"
   },
-  "suggest": {
-    "pimple/pimple": "Pimple allows to bootstrap phpmig really easily."
-  },
   "autoload": {
     "psr-0": {
       "Phpmig": "src/"
     }
-  },
-  "bin": [
-    "bin/phpmig"
-  ]
+  }
 }
