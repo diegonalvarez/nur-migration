@@ -3,10 +3,11 @@
  * @package    Phpmig
  * @subpackage Phpmig\Adapter
  */
+
 namespace Phpmig\Adapter\Zend;
 
-use \Phpmig\Migration\Migration,
-    \Phpmig\Adapter\AdapterInterface;
+use Phpmig\Adapter\AdapterInterface;
+use Phpmig\Migration\Migration;
 
 /**
  * This file is part of phpmig
@@ -45,12 +46,6 @@ class Db implements AdapterInterface
      */
     protected $adapter;
 
-    /**
-     *
-     *
-     * @param \Zend_Db_Adapter_Abstract $adapter
-     * @param \Zend_Config $configuration
-     */
     public function __construct(\Zend_Db_Adapter_Abstract $adapter, \Zend_Config $configuration)
     {
         $this->adapter = $adapter;
@@ -59,9 +54,7 @@ class Db implements AdapterInterface
     }
 
     /**
-     * Get all migrated version numbers
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function fetchAll()
     {
@@ -69,20 +62,20 @@ class Db implements AdapterInterface
         $select->from($this->tableName, 'version');
         $select->order('version ASC');
         $all = $this->adapter->fetchAll($select);
-        return array_map(function($v) {return $v['version'];}, $all);
+
+        return array_map(static function ($v) {
+            return $v['version'];
+        }, $all);
     }
 
     /**
-     * Up
-     *
-     * @param Migration $migration
-     * @return AdapterInterface
+     * {@inheritdoc}
      */
     public function up(Migration $migration)
     {
-        $this->adapter->insert($this->tableName, array(
+        $this->adapter->insert($this->tableName, [
             'version' => $migration->getVersion(),
-        ));
+        ]);
 
         return $this;
     }
@@ -91,6 +84,7 @@ class Db implements AdapterInterface
      * Down
      *
      * @param Migration $migration
+     *
      * @return AdapterInterface
      */
     public function down(Migration $migration)
@@ -103,9 +97,7 @@ class Db implements AdapterInterface
     }
 
     /**
-     * Is the schema ready?
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasSchema()
     {
@@ -117,24 +109,17 @@ class Db implements AdapterInterface
             return false;
         }
 
-        if (is_array($schema) && !empty($schema)) {
-            return true;
-        }
-
-        return false;
+        return is_array($schema) && !empty($schema);
     }
 
     /**
-     * Create Schema
-     *
-     * @throws \InvalidArgumentException
-     * @return AdapterInterface
+     * {@inheritdoc}
      */
     public function createSchema()
     {
         $sql = $this->createStatement;
         if ($sql === null) {
-            switch(get_class($this->adapter)) {
+            switch (get_class($this->adapter)) {
                 case 'Zend_Db_Adapter_Pdo_Mssql':
                     $createStatement = static::MSSQL_CREATE_STATEMENT;
                     break;
@@ -163,5 +148,4 @@ class Db implements AdapterInterface
 
         return $this;
     }
-
 }

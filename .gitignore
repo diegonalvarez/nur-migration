@@ -4,5 +4,7 @@
 /vendor/
 /build/
 
+.phpunit.result.cache
 .project
 .settings
+.idea

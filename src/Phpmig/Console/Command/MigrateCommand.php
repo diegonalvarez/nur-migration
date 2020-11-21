@@ -3,12 +3,12 @@
  * @package    Phpmig
  * @subpackage Phpmig\Console
  */
+
 namespace Phpmig\Console\Command;
 
-use Symfony\Component\Console\Input\InputInterface,
-    Symfony\Component\Console\Input\InputArgument,
-    Symfony\Component\Console\Output\OutputInterface,
-    Symfony\Component\Config\FileLocator;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * This file is part of phpmig
@@ -34,16 +34,16 @@ class MigrateCommand extends AbstractCommand
         parent::configure();
 
         $this->setName('migrate')
-             ->addOption('--target', '-t', InputArgument::OPTIONAL, 'The version number to migrate to')
-             ->setDescription('Run all migrations')
-             ->setHelp(<<<EOT
+            ->addOption('--target', '-t', InputArgument::OPTIONAL, 'The version number to migrate to')
+            ->setDescription('Run all migrations')
+            ->setHelp(<<<EOT
 The <info>migrate</info> command runs all available migrations, optionally up to a specific version
 
 <info>phpmig migrate</info>
 <info>phpmig migrate -t 20111018185412</info>
 
 EOT
-        );
+            );
     }
 
     /**
@@ -54,7 +54,7 @@ EOT
         $this->bootstrap($input, $output);
 
         $migrations = $this->getMigrations();
-        $versions   = $this->getAdapter()->fetchAll();
+        $versions = $this->getAdapter()->fetchAll();
 
         $version = $input->getOption('target');
 
@@ -70,13 +70,13 @@ EOT
 
         if (null !== $version) {
             if (0 != $version && !isset($migrations[$version])) {
-                return;
+                return 0;
             }
         } else {
             $versionNumbers = array_merge($versions, array_keys($migrations));
 
             if (empty($versionNumbers)) {
-                return;
+                return 0;
             }
 
             $version = max($versionNumbers);
@@ -84,12 +84,12 @@ EOT
 
         $direction = $version > $current ? 'up' : 'down';
 
-        if ($direction == 'down') {
+        if ($direction === 'down') {
             /**
              * Run downs first
              */
             krsort($migrations);
-            foreach($migrations as $migration) {
+            foreach ($migrations as $migration) {
                 if ($migration->getVersion() <= $version) {
                     break;
                 }
@@ -102,7 +102,7 @@ EOT
         }
 
         ksort($migrations);
-        foreach($migrations as $migration) {
+        foreach ($migrations as $migration) {
             if ($migration->getVersion() > $version) {
                 break;
             }
@@ -112,5 +112,7 @@ EOT
                 $container['phpmig.migrator']->up($migration);
             }
         }
+
+        return 0;
     }
 }

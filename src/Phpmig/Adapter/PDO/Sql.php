@@ -2,56 +2,46 @@
 
 namespace Phpmig\Adapter\PDO;
 
-use Phpmig\Migration\Migration,
-    Phpmig\Adapter\AdapterInterface,
-    PDO;
+use PDO;
+use Phpmig\Adapter\AdapterInterface;
+use Phpmig\Migration\Migration;
 
 /**
  * Simple PDO adapter to work with SQL database
  *
  * @author Samuel Laulhau https://github.com/lalop
  */
-
 class Sql implements AdapterInterface
 {
 
     /**
      * @var \PDO
      */
-    protected $connection    = null;
+    protected $connection;
 
     /**
      * @var string
      */
-    protected $tableName     = null;
+    protected $tableName;
 
     /**
      * @var string
      */
-    protected $pdoDriverName = null;
+    protected $pdoDriverName;
 
     /**
-     * Constructor
-     *
-     * @param \PDO $connection
+     * @param \PDO   $connection
      * @param string $tableName
      */
     public function __construct(\PDO $connection, $tableName)
     {
-        $this->connection    = $connection;
-        $this->tableName     = $tableName;
+        $this->connection = $connection;
+        $this->tableName = $tableName;
         $this->pdoDriverName = $connection->getAttribute(\PDO::ATTR_DRIVER_NAME);
     }
 
-    private function quotedTableName()
-    {
-        return "`{$this->tableName}`";
-    }
-
     /**
-     * Fetch all
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function fetchAll()
     {
@@ -61,42 +51,33 @@ class Sql implements AdapterInterface
     }
 
     /**
-     * Up
-     *
-     * @param Migration $migration
-     * @return self
+     * {@inheritdoc}
      */
     public function up(Migration $migration)
     {
         $sql = $this->getQuery('up');
 
         $this->connection->prepare($sql)
-                ->execute(array(':version' => $migration->getVersion()));
+            ->execute([':version' => $migration->getVersion()]);
 
         return $this;
     }
 
     /**
-     * Down
-     *
-     * @param Migration $migration
-     * @return self
+     * {@inheritdoc}
      */
     public function down(Migration $migration)
     {
         $sql = $this->getQuery('down');
 
         $this->connection->prepare($sql)
-                ->execute(array(':version' => $migration->getVersion()));
+            ->execute([':version' => $migration->getVersion()]);
 
         return $this;
     }
 
-
     /**
-     * Is the schema ready?
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasSchema()
     {
@@ -104,7 +85,7 @@ class Sql implements AdapterInterface
 
         $tables = $this->connection->query($sql);
 
-        while($table = $tables->fetchColumn()) {
+        while ($table = $tables->fetchColumn()) {
             if ($table == $this->tableName) {
                 return true;
             }
@@ -113,11 +94,8 @@ class Sql implements AdapterInterface
         return false;
     }
 
-
     /**
-     * Create Schema
-     *
-     * @return DBAL
+     * {@inheritdoc}
      */
     public function createSchema()
     {
@@ -140,86 +118,64 @@ class Sql implements AdapterInterface
      *
      * @return string
      */
-    protected function getQuery($type)
+    protected function getQuery(string $type): string
     {
-        $queries = array();
-
-        switch($this->pdoDriverName)
-        {
+        switch ($this->pdoDriverName) {
             case 'dblib':
             case 'sqlsrv':
-                $queries = array(
-
-                        'fetchAll'     => "SELECT version FROM {$this->tableName} ORDER BY version ASC",
-
-                        'up'           => "INSERT INTO {$this->tableName} VALUES (:version)",
-
-                        'down'         => "DELETE FROM {$this->tableName} WHERE version = :version",
-
-                        'hasSchema'    => "Select Table_name as 'Table name'
-                            From Information_schema.Tables
-                            Where Table_type = 'BASE TABLE' and Objectproperty
-                            (Object_id(Table_name), 'IsMsShipped') = 0",
-
-                        'createSchema' => "CREATE table {$this->tableName} (version varchar(255) NOT NULL)",
-
-                    );
+                $queries = [
+                    'fetchAll' => "SELECT version FROM {$this->tableName} ORDER BY version ASC",
+                    'up' => "INSERT INTO {$this->tableName} VALUES (:version)",
+                    'down' => "DELETE FROM {$this->tableName} WHERE version = :version",
+                    'hasSchema' => "Select Table_name as 'Table name'
+                        From Information_schema.Tables
+                        Where Table_type = 'BASE TABLE' and Objectproperty
+                        (Object_id(Table_name), 'IsMsShipped') = 0",
+                    'createSchema' => "CREATE table {$this->tableName} (version varchar(255) NOT NULL)",
+                ];
                 break;
 
             case 'sqlite':
-                $queries = array(
-
-                        'fetchAll'     => "SELECT `version` FROM {$this->quotedTableName()} ORDER BY `version` ASC",
-
-                        'up'           => "INSERT INTO {$this->quotedTableName()} VALUES (:version);",
-
-                        'down'         => "DELETE FROM {$this->quotedTableName()} WHERE version = :version",
-
-                        'hasSchema'    => "SELECT `name` FROM `sqlite_master` WHERE `type`='table';",
-
-                        'createSchema' => "CREATE table {$this->quotedTableName()} (`version` NOT NULL);",
-
-                    );
+                $queries = [
+                    'fetchAll' => "SELECT `version` FROM {$this->quotedTableName()} ORDER BY `version` ASC",
+                    'up' => "INSERT INTO {$this->quotedTableName()} VALUES (:version);",
+                    'down' => "DELETE FROM {$this->quotedTableName()} WHERE version = :version",
+                    'hasSchema' => "SELECT `name` FROM `sqlite_master` WHERE `type`='table';",
+                    'createSchema' => "CREATE table {$this->quotedTableName()} (`version` NOT NULL);",
+                ];
                 break;
 
             case 'pgsql':
-                $queries = array(
-
-                        'fetchAll'     => "SELECT \"version\" FROM \"{$this->tableName}\" ORDER BY \"version\" ASC",
-
-                        'up'           => "INSERT INTO \"{$this->tableName}\" VALUES (:version)",
-
-                        'down'         => "DELETE FROM \"{$this->tableName}\" WHERE \"version\" = :version",
-
-                        'hasSchema'    => "SELECT \"tablename\" FROM \"pg_tables\"",
-
-                        'createSchema' => "CREATE TABLE \"{$this->tableName}\" (\"version\" VARCHAR(255) NOT NULL)",
-
-                    );
+                $queries = [
+                    'fetchAll' => "SELECT \"version\" FROM \"{$this->tableName}\" ORDER BY \"version\" ASC",
+                    'up' => "INSERT INTO \"{$this->tableName}\" VALUES (:version)",
+                    'down' => "DELETE FROM \"{$this->tableName}\" WHERE \"version\" = :version",
+                    'hasSchema' => "SELECT \"tablename\" FROM \"pg_tables\"",
+                    'createSchema' => "CREATE TABLE \"{$this->tableName}\" (\"version\" VARCHAR(255) NOT NULL)",
+                ];
                 break;
 
             case 'mysql':
             default:
-                $queries = array(
-
-                        'fetchAll'     => "SELECT `version` FROM {$this->quotedTableName()} ORDER BY `version` ASC",
-
-                        'up'           => "INSERT into {$this->quotedTableName()} set version = :version",
-
-                        'down'         => "DELETE from {$this->quotedTableName()} where version = :version",
-
-                        'hasSchema'    => "SHOW TABLES;",
-
-                        'createSchema' => "CREATE TABLE {$this->quotedTableName()} (`version` VARCHAR(255) NOT NULL);",
-
-                    );
+                $queries = [
+                    'fetchAll' => "SELECT `version` FROM {$this->quotedTableName()} ORDER BY `version` ASC",
+                    'up' => "INSERT into {$this->quotedTableName()} set version = :version",
+                    'down' => "DELETE from {$this->quotedTableName()} where version = :version",
+                    'hasSchema' => "SHOW TABLES;",
+                    'createSchema' => "CREATE TABLE {$this->quotedTableName()} (`version` VARCHAR(255) NOT NULL);",
+                ];
                 break;
         }
 
-        if(!array_key_exists($type, $queries))
+        if (!array_key_exists($type, $queries)) {
             throw new \InvalidArgumentException("Query type not found: '{$type}'");
+        }
 
         return $queries[$type];
     }
-}
 
+    private function quotedTableName(): string
+    {
+        return "`{$this->tableName}`";
+    }
+}

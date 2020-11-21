@@ -3,10 +3,11 @@
  * @package    Phpmig
  * @subpackage Phpmig\Migration
  */
+
 namespace Phpmig\Migration;
 
-use Phpmig\Adapter\AdapterInterface,
-    Symfony\Component\Console\Output\OutputInterface;
+use Phpmig\Adapter\AdapterInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * This file is part of phpmig
@@ -45,19 +46,20 @@ class Migrator
      * Constructor
      *
      * @param AdapterInterface $adapter
-     * @param \ArrayAccess $container
+     * @param \ArrayAccess     $container
      */
     public function __construct(AdapterInterface $adapter, \ArrayAccess $container, OutputInterface $output)
     {
-        $this->container  = $container;
-        $this->adapter    = $adapter;
-        $this->output     = $output;
+        $this->container = $container;
+        $this->adapter = $adapter;
+        $this->output = $output;
     }
 
     /**
      * Run the up method on a migration
      *
      * @param Migration $migration
+     *
      * @return void
      */
     public function up(Migration $migration)
@@ -70,6 +72,7 @@ class Migrator
      * Run the down method on a migration
      *
      * @param Migration $migration
+     *
      * @return void
      */
     public function down(Migration $migration)
@@ -79,15 +82,85 @@ class Migrator
     }
 
     /**
+     * Get Container
+     *
+     * @return \ArrayAccess
+     */
+    public function getContainer()
+    {
+        return $this->container;
+    }
+
+    /**
+     * Set Container
+     *
+     * @param \ArrayAccess $container
+     *
+     * @return Migrator
+     */
+    public function setContainer(\ArrayAccess $container)
+    {
+        $this->container = $container;
+        return $this;
+    }
+
+    /**
+     * Get Adapter
+     *
+     * @return AdapterInterface
+     */
+    public function getAdapter()
+    {
+        return $this->adapter;
+    }
+
+    /**
+     * Set Adapter
+     *
+     * @param AdapterInterface $adapter
+     *
+     * @return Migrator
+     */
+    public function setAdapter(AdapterInterface $adapter)
+    {
+        $this->adapter = $adapter;
+        return $this;
+    }
+
+    /**
+     * Get Output
+     *
+     * @return OutputInterface
+     */
+    public function getOutput()
+    {
+        return $this->output;
+    }
+
+    /**
+     * Set Output
+     *
+     * @param OutputInterface $output
+     *
+     * @return Migrator
+     */
+    public function setOutput(OutputInterface $output)
+    {
+        $this->output = $output;
+        return $this;
+    }
+
+    /**
      * Run a migration in a particular direction
      *
      * @param Migration $migration
-     * @param string $direction
+     * @param string    $direction
+     *
      * @return void
      */
     protected function run(Migration $migration, $direction = 'up')
     {
-        $direction = ($direction == 'down' ? 'down' :'up');
+        $direction = ($direction == 'down' ? 'down' : 'up');
         $this->getOutput()->writeln(sprintf(
             ' == <info>' .
             $migration->getVersion() . ' ' .
@@ -112,73 +185,4 @@ class Migrator
             '</comment>'
         ));
     }
-
-    /**
-     * Get Container
-     *
-     * @return \ArrayAccess
-     */
-    public function getContainer()
-    {
-        return $this->container;
-    }
-
-    /**
-     * Set Container
-     *
-     * @param \ArrayAccess $container
-     * @return Migrator
-     */
-    public function setContainer(\ArrayAccess $container)
-    {
-        $this->container = $container;
-        return $this;
-    }
-
-    /**
-     * Get Adapter
-     *
-     * @return AdapterInterface
-     */
-    public function getAdapter()
-    {
-        return $this->adapter;
-    }
-
-    /**
-     * Set Adapter
-     *
-     * @param AdapterInterface $adapter
-     * @return Migrator
-     */
-    public function setAdapter(AdapterInterface $adapter)
-    {
-        $this->adapter = $adapter;
-        return $this;
-    }
-
-    /**
-     * Get Output
-     *
-     * @return OutputInterface
-     */
-    public function getOutput()
-    {
-        return $this->output;
-    }
-
-    /**
-     * Set Output
-     *
-     * @param OutputInterface $output
-     * @return Migrator
-     */
-    public function setOutput(OutputInterface $output)
-    {
-        $this->output = $output;
-        return $this;
-    }
 }
-
-
-

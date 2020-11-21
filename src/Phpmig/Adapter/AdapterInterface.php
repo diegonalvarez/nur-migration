@@ -3,9 +3,10 @@
  * @package    Phpmig
  * @subpackage Phpmig\Adapter
  */
+
 namespace Phpmig\Adapter;
 
-use \Phpmig\Migration\Migration;
+use Phpmig\Migration\Migration;
 
 /**
  * This file is part of phpmig
@@ -34,6 +35,7 @@ interface AdapterInterface
      * Up
      *
      * @param Migration $migration
+     *
      * @return AdapterInterface
      */
     public function up(Migration $migration);
@@ -42,12 +44,13 @@ interface AdapterInterface
      * Down
      *
      * @param Migration $migration
+     *
      * @return AdapterInterface
      */
     public function down(Migration $migration);
 
     /**
-     * Is the schema ready? 
+     * Is the schema ready?
      *
      * @return bool
      */
@@ -60,6 +63,5 @@ interface AdapterInterface
      */
     public function createSchema();
 }
-
 
 

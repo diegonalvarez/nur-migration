@@ -3,11 +3,12 @@
  * @package    Phpmig
  * @subpackage Phpmig\Adapter
  */
+
 namespace Phpmig\Adapter\Illuminate;
 
 use PDO;
-use \Phpmig\Migration\Migration,
-    \Phpmig\Adapter\AdapterInterface;
+use Phpmig\Adapter\AdapterInterface;
+use Phpmig\Migration\Migration;
 use RuntimeException;
 
 /**
@@ -25,16 +26,14 @@ class Database implements AdapterInterface
      */
     protected $adapter;
 
-    public function __construct($adapter, $tableName, $connectionName = '')
+    public function __construct($adapter, string $tableName, string $connectionName = '')
     {
         $this->adapter = $adapter->connection($connectionName);
         $this->tableName = $tableName;
     }
 
     /**
-     * Get all migrated version numbers
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function fetchAll()
     {
@@ -46,11 +45,11 @@ class Database implements AdapterInterface
             ->orderBy('version')
             ->get();
 
-        if(!is_array($all)) {
+        if (!is_array($all)) {
             $all = $all->toArray();
         }
 
-        return array_map(function($v) use($fetchMode) {
+        return array_map(function ($v) use ($fetchMode) {
 
             switch ($fetchMode) {
 
@@ -67,27 +66,21 @@ class Database implements AdapterInterface
     }
 
     /**
-     * Up
-     *
-     * @param Migration $migration
-     * @return AdapterInterface
+     * {@inheritdoc}
      */
     public function up(Migration $migration)
     {
         $this->adapter
             ->table($this->tableName)
-            ->insert(array(
-                'version' => $migration->getVersion()
-            ));
+            ->insert([
+                'version' => $migration->getVersion(),
+            ]);
 
         return $this;
     }
 
     /**
-     * Down
-     *
-     * @param Migration $migration
-     * @return AdapterInterface
+     * {@inheritdoc}
      */
     public function down(Migration $migration)
     {
@@ -100,9 +93,7 @@ class Database implements AdapterInterface
     }
 
     /**
-     * Is the schema ready?
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasSchema()
     {
@@ -110,9 +101,7 @@ class Database implements AdapterInterface
     }
 
     /**
-     * Create Schema
-     *
-     * @return AdapterInterface
+     * {@inheritdoc}
      */
     public function createSchema()
     {
@@ -120,5 +109,7 @@ class Database implements AdapterInterface
         $this->adapter->getSchemaBuilder()->create($this->tableName, function ($table) {
             $table->string('version');
         });
+
+        return $this;
     }
 }

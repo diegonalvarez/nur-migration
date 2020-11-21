@@ -3,12 +3,13 @@
  * @package    Phpmig
  * @subpackage Phpmig\Adapter
  */
+
 namespace Phpmig\Adapter\Doctrine;
 
-use \Doctrine\DBAL\Connection,
-    \Doctrine\DBAL\Schema\Schema,
-    \Phpmig\Migration\Migration,
-    \Phpmig\Adapter\AdapterInterface;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Schema\Schema;
+use Phpmig\Adapter\AdapterInterface;
+use Phpmig\Migration\Migration;
 
 /**
  * This file is part of phpmig
@@ -30,101 +31,86 @@ class DBAL implements AdapterInterface
     /**
      * @var \Doctrine\DBAL\Connection
      */
-    protected $connection = null;
+    protected $connection;
 
     /**
      * @var string
      */
-    protected $tableName = null;
+    protected $tableName;
 
-    /**
-     * Constructor
-     *
-     * @param Connection $connection
-     * @param string $tableName
-     */
-    public function __construct(Connection $connection, $tableName)
+    public function __construct(Connection $connection, string $tableName)
     {
         $this->connection = $connection;
-        $this->tableName  = $tableName;
+        $this->tableName = $tableName;
     }
 
     /**
-     * Fetch all 
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function fetchAll()
     {
         $tableName = $this->connection->quoteIdentifier($this->tableName);
         $sql = "SELECT version FROM $tableName ORDER BY version ASC";
         $all = $this->connection->fetchAll($sql);
-        return array_map(function($v) {return $v['version'];}, $all);
+
+        return array_map(function ($v) {
+            return $v['version'];
+        }, $all);
     }
 
     /**
-     * Up
-     *
-     * @param Migration $migration
-     * @return DBAL
+     * {@inheritdoc}
      */
-    public function up(Migration $migration) 
+    public function up(Migration $migration)
     {
-        $this->connection->insert($this->tableName, array(
+        $this->connection->insert($this->tableName, [
             'version' => $migration->getVersion(),
-        ));
+        ]);
 
         return $this;
     }
 
     /**
-     * Down
-     *
-     * @param Migration $migration
-     * @return DBAL
+     * {@inheritdoc}
      */
     public function down(Migration $migration)
     {
-        $this->connection->delete($this->tableName, array(
+        $this->connection->delete($this->tableName, [
             'version' => $migration->getVersion(),
-        ));
+        ]);
 
         return $this;
     }
 
     /**
-     * Is the schema ready? 
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasSchema()
     {
         $sm = $this->connection->getSchemaManager();
         $tables = $sm->listTables();
-        foreach($tables as $table) {
+        foreach ($tables as $table) {
             if ($table->getName() == $this->tableName) {
                 return true;
             }
         }
+
         return false;
     }
 
     /**
-     * Create Schema
-     *
-     * @return DBAL
+     * {@inheritdoc}
      */
     public function createSchema()
     {
-        $schema  = new \Doctrine\DBAL\Schema\Schema();
-        $table   = $schema->createTable($this->tableName);
-        $table->addColumn("version", "string", array("length" => 255));
+        $schema = new \Doctrine\DBAL\Schema\Schema();
+        $table = $schema->createTable($this->tableName);
+        $table->addColumn("version", "string", ["length" => 255]);
         $queries = $schema->toSql($this->connection->getDatabasePlatform());
-        foreach($queries as $sql) {
+        foreach ($queries as $sql) {
             $this->connection->query($sql);
         }
+
         return $this;
     }
-
 }
-

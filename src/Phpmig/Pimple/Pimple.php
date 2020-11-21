@@ -12,7 +12,9 @@ namespace Phpmig\Pimple;
  */
 
 /**
- * Here to provide a little bit of BC, this used to be a bundled version of 
+ * Here to provide a little bit of BC, this used to be a bundled version of
  * Pimple
  */
-class Pimple extends \Pimple {}
+class Pimple extends \Pimple
+{
+}

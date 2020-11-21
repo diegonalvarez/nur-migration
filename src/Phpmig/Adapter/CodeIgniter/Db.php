@@ -3,20 +3,30 @@
  * @package    Phpmig
  * @subpackage Phpmig\Adapter
  */
+
 namespace Phpmig\Adapter\CodeIgniter;
 
-use \Phpmig\Migration\Migration,
-    \Phpmig\Adapter\AdapterInterface;
+use Phpmig\Adapter\AdapterInterface;
+use Phpmig\Migration\Migration;
 
 class Db implements AdapterInterface
 {
-    protected $ci = null;
+    /**
+     * @var \CI_Controller
+     */
+    protected $ci;
 
-    protected $connection = null;
+    /**
+     * @var \CI_DB_query_builder
+     */
+    protected $connection;
 
-    protected $tableName = null;
+    /**
+     * @var string
+     */
+    protected $tableName;
 
-    public function __construct($tableName)
+    public function __construct(string $tableName)
     {
         $this->ci = &get_instance();
         $this->ci->load->dbforge();
@@ -24,31 +34,40 @@ class Db implements AdapterInterface
         $this->connection = $this->ci->db;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function fetchAll()
     {
-        $rows = array();
+        $rows = [];
 
         $query = $this->connection->get($this->tableName);
 
         foreach ($query->result() as $row) {
-           $rows[] = $row->version;
+            $rows[] = $row->version;
         }
 
         return $rows;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function up(Migration $migration)
     {
         $this->connection->insert(
             $this->tableName,
-            array(
-                'version' => $migration->getVersion()
-            )
+            [
+                'version' => $migration->getVersion(),
+            ]
         );
 
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function down(Migration $migration)
     {
         $this->connection->where('version', $migration->getVersion());
@@ -57,16 +76,22 @@ class Db implements AdapterInterface
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function hasSchema()
     {
         return $this->connection->table_exists($this->tableName);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function createSchema()
     {
-        $fields = array(
-            "`version` bigint(20) unsigned NOT NULL"
-        );
+        $fields = [
+            "`version` bigint(20) unsigned NOT NULL",
+        ];
 
         $this->ci->dbforge->add_field($fields);
         $this->ci->dbforge->create_table($this->tableName);
@@ -74,4 +99,3 @@ class Db implements AdapterInterface
         return $this;
     }
 }
-

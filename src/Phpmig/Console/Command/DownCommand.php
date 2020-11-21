@@ -3,12 +3,12 @@
  * @package    Phpmig
  * @subpackage Phpmig\Console
  */
+
 namespace Phpmig\Console\Command;
 
-use Symfony\Component\Console\Input\InputInterface,
-    Symfony\Component\Console\Input\InputArgument,
-    Symfony\Component\Console\Output\OutputInterface,
-    Symfony\Component\Config\FileLocator;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * This file is part of phpmig
@@ -34,15 +34,15 @@ class DownCommand extends AbstractCommand
         parent::configure();
 
         $this->setName('down')
-             ->addArgument('version', InputArgument::REQUIRED, 'The version number for the migration')
-             ->setDescription('Revert a specific migration')
-             ->setHelp(<<<EOT
+            ->addArgument('version', InputArgument::REQUIRED, 'The version number for the migration')
+            ->setDescription('Revert a specific migration')
+            ->setHelp(<<<EOT
 The <info>down</info> command reverts a specific migration
 
 <info>phpmig down 20111018185412</info>
 
 EOT
-        );
+            );
     }
 
     /**
@@ -53,22 +53,21 @@ EOT
         $this->bootstrap($input, $output);
 
         $migrations = $this->getMigrations();
-        $versions   = $this->getAdapter()->fetchAll();
+        $versions = $this->getAdapter()->fetchAll();
 
         $version = $input->getArgument('version');
 
         if (!in_array($version, $versions)) {
-            return;
+            return 0;
         }
 
         if (!isset($migrations[$version])) {
-            return;
+            return 0;
         }
 
         $container = $this->getContainer();
         $container['phpmig.migrator']->down($migrations[$version]);
+
+        return 0;
     }
 }
-
-
-

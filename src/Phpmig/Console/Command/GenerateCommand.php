@@ -3,12 +3,13 @@
  * @package    Phpmig
  * @subpackage Phpmig\Console
  */
+
 namespace Phpmig\Console\Command;
 
-use Symfony\Component\Console\Input\InputInterface,
-    Symfony\Component\Console\Input\InputArgument,
-    Symfony\Component\Console\Output\OutputInterface,
-    Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * This file is part of phpmig
@@ -34,16 +35,17 @@ class GenerateCommand extends AbstractCommand
         parent::configure();
 
         $this->setName('generate')
-             ->addArgument('name', InputArgument::REQUIRED, 'The name for the migration')
-             ->addArgument('path', InputArgument::OPTIONAL, 'The directory in which to put the migration ( optional if phpmig.migrations_path is setted )')
-             ->setDescription('Generate a new migration')
-             ->setHelp(<<<EOT
+            ->addArgument('name', InputArgument::REQUIRED, 'The name for the migration')
+            ->addArgument('path', InputArgument::OPTIONAL,
+                'The directory in which to put the migration ( optional if phpmig.migrations_path is setted )')
+            ->setDescription('Generate a new migration')
+            ->setHelp(<<<EOT
 The <info>generate</info> command creates a new migration with the name and path specified
 
 <info>phpmig generate Dave ./migrations</info>
 
 EOT
-        );
+            );
     }
 
     /**
@@ -55,18 +57,21 @@ EOT
 
         $path = $input->getArgument('path');
         $set = $input->getOption('set');
-        if( null === $path ){
-            if (isset($this->container['phpmig.migrations_path'])) {
+        if (null === $path) {
+            if (true === isset($this->container['phpmig.migrations_path'])) {
                 $path = $this->container['phpmig.migrations_path'];
             }
-            if (isset($this->container['phpmig.sets']) && isset($this->container['phpmig.sets'][$set]['migrations_path'])) {
-                $path = $this->container['phpmig.sets'][$set]['migrations_path'];
+            // do not deep link to nested keys without first testing the parent key
+            if (true === isset($this->container['phpmig.sets'])) {
+                if (true === isset($this->container['phpmig.sets'][$set]['migrations_path'])) {
+                    $path = $this->container['phpmig.sets'][$set]['migrations_path'];
+                }
             }
         }
-        $locator = new FileLocator(array());
-        $path    = $locator->locate($path, getcwd(), $first = true);
+        $locator = new FileLocator([]);
+        $path = $locator->locate($path, getcwd(), $first = true);
 
-        if (!is_writeable($path)) {
+        if (!is_writable($path)) {
             throw new \InvalidArgumentException(sprintf(
                 'The directory "%s" is not writeable',
                 $path
@@ -77,7 +82,7 @@ EOT
 
         $migrationName = $this->transMigName($input->getArgument('name'));
 
-        $basename  = date('YmdHis') . '_' . $migrationName . '.php';
+        $basename = date('YmdHis') . '_' . $migrationName . '.php';
 
         $path = $path . DIRECTORY_SEPARATOR . $basename;
 
@@ -90,8 +95,13 @@ EOT
 
         $className = $this->migrationToClassName($migrationName);
 
-        if (isset($this->container['phpmig.migrations_template_path'])) {
-            $migrationsTemplatePath = $this->container['phpmig.migrations_template_path'];
+        if (isset($this->container['phpmig.migrations_template_path']) || (isset($this->container['phpmig.sets']) && isset($this->container['phpmig.sets'][$set]['migrations_template_path']))) {
+            if (true === isset($this->container['phpmig.migrations_template_path'])) {
+                $migrationsTemplatePath = $this->container['phpmig.migrations_template_path'];
+            } else {
+                $migrationsTemplatePath = $this->container['phpmig.sets'][$set]['migrations_template_path'];
+            }
+
             if (false === file_exists($migrationsTemplatePath)) {
                 throw new \RuntimeException(sprintf(
                     'The template file "%s" not found',
@@ -101,7 +111,7 @@ EOT
 
             if (preg_match('/\.php$/', $migrationsTemplatePath)) {
                 ob_start();
-                include($migrationsTemplatePath);
+                include $migrationsTemplatePath;
                 $contents = ob_get_clean();
             } else {
                 $contents = file_get_contents($migrationsTemplatePath);
@@ -147,7 +157,7 @@ PHP;
             '.' . str_replace(getcwd(), '', $path)
         );
 
-        return;
+        return 0;
     }
 
     protected function transMigName($migrationName)
@@ -159,6 +169,3 @@ PHP;
         return 'mig' . $migrationName;
     }
 }
-
-
-

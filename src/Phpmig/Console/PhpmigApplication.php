@@ -3,12 +3,11 @@
  * @package    Phpmig
  * @subpackage Console
  */
+
 namespace Phpmig\Console;
 
 use Phpmig\Console\Command;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * This file is part of phpmig
@@ -33,7 +32,7 @@ class PhpmigApplication extends Application
     {
         parent::__construct('phpmig', $version);
 
-        $this->addCommands(array(
+        $this->addCommands([
             new Command\InitCommand(),
             new Command\StatusCommand(),
             new Command\CheckCommand(),
@@ -42,8 +41,7 @@ class PhpmigApplication extends Application
             new Command\DownCommand(),
             new Command\MigrateCommand(),
             new Command\RollbackCommand(),
-            new Command\RedoCommand()
-        ));
+            new Command\RedoCommand(),
+        ]);
     }
 }
-

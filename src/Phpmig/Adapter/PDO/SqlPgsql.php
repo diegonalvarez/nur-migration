@@ -2,43 +2,34 @@
 
 namespace Phpmig\Adapter\PDO;
 
-use Phpmig\Migration\Migration,
-    Phpmig\Adapter\AdapterInterface,
-    PDO;
+use PDO;
+use Phpmig\Migration\Migration;
 
 /**
  * Simple PDO adapter to work with Postgres SQL database in particular.
+ *
  * @author Theodson https://github.com/theodson
  */
 class SqlPgsql extends Sql
 {
-    private $quote = "\"";
-    private $schemaName = "public";
+    private $quote;
+    private $schemaName;
 
     /**
-     * Constructor
-     *
-     * @param \PDO $connection
+     * @param \PDO   $connection
      * @param string $tableName
+     * @param string $schemaName
      */
     public function __construct(\PDO $connection, $tableName, $schemaName = 'public')
     {
         parent::__construct($connection, $tableName);
         $driver = $this->connection->getAttribute(PDO::ATTR_DRIVER_NAME);
-        $this->quote = in_array($driver, array('mysql', 'pgsql')) ? '"' : '`';
+        $this->quote = in_array($driver, ['mysql', 'pgsql']) ? '"' : '`';
         $this->schemaName = $schemaName;
     }
 
-    private function quotedTableName()
-    {
-        $sql = "{$this->quote}{$this->schemaName}{$this->quote}.{$this->quote}{$this->tableName}{$this->quote}";
-        return $sql;
-    }
-
     /**
-     * Fetch all
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function fetchAll()
     {
@@ -47,38 +38,29 @@ class SqlPgsql extends Sql
     }
 
     /**
-     * Up
-     *
-     * @param Migration $migration
-     * @return self
+     * {@inheritdoc}
      */
     public function up(Migration $migration)
     {
         $sql = "INSERT into {$this->quotedTableName()} (version) VALUES (:version);";
         $this->connection->prepare($sql)
-            ->execute(array(':version' => $migration->getVersion()));
+            ->execute([':version' => $migration->getVersion()]);
         return $this;
     }
 
     /**
-     * Down
-     *
-     * @param Migration $migration
-     * @return self
+     * {@inheritdoc}
      */
     public function down(Migration $migration)
     {
         $sql = "DELETE from {$this->quotedTableName()} where version = :version";
         $this->connection->prepare($sql)
-            ->execute(array(':version' => $migration->getVersion()));
+            ->execute([':version' => $migration->getVersion()]);
         return $this;
     }
 
-
     /**
-     * Is the schema ready?
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasSchema()
     {
@@ -91,11 +73,8 @@ class SqlPgsql extends Sql
         return false;
     }
 
-
     /**
-     * Create Schema
-     *
-     * @return DBAL
+     * {@inheritdoc}
      */
     public function createSchema()
     {
@@ -105,20 +84,24 @@ class SqlPgsql extends Sql
 
         if (!$res || !$res->fetchColumn()) {
             $sql = sprintf("CREATE SCHEMA %s;", $this->schemaName);
-            if (FALSE === $this->connection->exec($sql)) {
+            if (false === $this->connection->exec($sql)) {
                 $e = $this->connection->errorInfo();
             }
         }
 
         $sql = "CREATE table {$this->quotedTableName()} (version %s NOT NULL, {$this->quote}migrate_date{$this->quote} timestamp(6) WITH TIME ZONE DEFAULT now())";
         $driver = $this->connection->getAttribute(PDO::ATTR_DRIVER_NAME);
-        $sql = sprintf($sql, in_array($driver, array('mysql', 'pgsql')) ? 'VARCHAR(255)' : '');
+        $sql = sprintf($sql, in_array($driver, ['mysql', 'pgsql']) ? 'VARCHAR(255)' : '');
 
-        if (FALSE === $this->connection->exec($sql)) {
+        if (false === $this->connection->exec($sql)) {
             $e = $this->connection->errorInfo();
         }
         return $this;
     }
 
+    private function quotedTableName()
+    {
+        $sql = "{$this->quote}{$this->schemaName}{$this->quote}.{$this->quote}{$this->tableName}{$this->quote}";
+        return $sql;
+    }
 }
-

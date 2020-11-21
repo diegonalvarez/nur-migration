@@ -3,10 +3,11 @@
  * @package    Phpmig
  * @subpackage Phpmig\Migration
  */
+
 namespace Phpmig\Migration;
 
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\DialogHelper;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * This file is part of phpmig
@@ -100,6 +101,7 @@ class Migration
      * Set version
      *
      * @param int $version
+     *
      * @return Migration
      */
     public function setVersion($version)
@@ -132,7 +134,8 @@ class Migration
      * Set Container
      *
      * @param \ArrayAccess $container
-     * @return Migrator
+     *
+     * @return Migration
      */
     public function setContainer(\ArrayAccess $container)
     {
@@ -154,7 +157,8 @@ class Migration
      * Set Output
      *
      * @param OutputInterface $output
-     * @return Migrator
+     *
+     * @return Migration
      */
     public function setOutput(OutputInterface $output)
     {
@@ -166,7 +170,8 @@ class Migration
      * Ask for input
      *
      * @param string $question
-     * @param mixed $default
+     * @param mixed  $default
+     *
      * @return string The users answer
      */
     public function ask($question, $default = null)
@@ -178,7 +183,8 @@ class Migration
      * Ask for confirmation
      *
      * @param string $question
-     * @param mixed $default
+     * @param mixed  $default
+     *
      * @return string The users answer
      */
     public function confirm($question, $default = true)
@@ -190,6 +196,7 @@ class Migration
      * Get something from the container
      *
      * @param string $key
+     *
      * @return mixed
      */
     public function get($key)
@@ -216,6 +223,7 @@ class Migration
      * Set Dialog Helper
      *
      * @param DialogHelper $dialogHelper
+     *
      * @return Migration
      */
     public function setDialogHelper(DialogHelper $dialogHelper)
@@ -224,6 +232,3 @@ class Migration
         return $this;
     }
 }
-
-
-

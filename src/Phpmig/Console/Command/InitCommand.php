@@ -3,6 +3,7 @@
  * @package    Phpmig
  * @subpackage Phpmig\Console
  */
+
 namespace Phpmig\Console\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,14 +31,14 @@ class InitCommand extends AbstractCommand
     protected function configure()
     {
         $this->setName('init')
-             ->setDescription('Initialise this directory for use with phpmig')
-             ->setHelp(<<<EOT
+            ->setDescription('Initialise this directory for use with phpmig')
+            ->setHelp(<<<EOT
 The <info>init</info> command creates a skeleton bootstrap file and a migrations directory
 
 <info>phpmig init</info>
 
 EOT
-        );
+            );
     }
 
     /**
@@ -52,12 +53,15 @@ EOT
 
         $this->initMigrationsDir($migrations, $output);
         $this->initBootstrap($bootstrap, $relative, $output);
+
+        return 0;
     }
 
     /**
      * Create migrations dir
      *
      * @param $path
+     *
      * @return void
      */
     protected function initMigrationsDir($migrations, OutputInterface $output)
@@ -85,8 +89,9 @@ EOT
     /**
      * Create bootstrap
      *
-     * @param string $bootstrap where to put bootstrap file
+     * @param string $bootstrap  where to put bootstrap file
      * @param string $migrations path to migrations dir relative to bootstrap
+     *
      * @return void
      */
     protected function initBootstrap($bootstrap, $migrations, OutputInterface $output)
@@ -100,7 +105,7 @@ EOT
             return;
         }
 
-        if (!is_writeable(dirname($bootstrap))) {
+        if (!is_writable(dirname($bootstrap))) {
             throw new \RuntimeException(sprintf('The file "%s" is not writeable', $bootstrap));
         }
 
@@ -136,6 +141,3 @@ PHP;
         );
     }
 }
-
-
-

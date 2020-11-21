@@ -2,8 +2,8 @@
 
 namespace Phpmig\Console\Command;
 
-use Symfony\Component\Console\Input\InputInterface,
-    Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * This file is part of phpmig
@@ -13,7 +13,6 @@ use Symfony\Component\Console\Input\InputInterface,
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 class CheckCommand extends AbstractCommand
 {
     protected function configure()
@@ -21,15 +20,15 @@ class CheckCommand extends AbstractCommand
         parent::configure();
 
         $this->setName('check')
-             ->setDescription('Check all migrations have been run, exit with non-zero if not')
-             ->setHelp(<<<EOT
+            ->setDescription('Check all migrations have been run, exit with non-zero if not')
+            ->setHelp(<<<EOT
 The <info>check</info> checks that all migrations have been run and exits with a 
 non-zero exit code if not, useful for build or deployment scripts.
 
 <info>phpmig check</info>
 
 EOT
-        );
+            );
     }
 
     /**
@@ -39,8 +38,8 @@ EOT
     {
         $this->bootstrap($input, $output);
         $versions = $this->getAdapter()->fetchAll();
-        $down = array();
-        foreach($this->getMigrations() as $migration) {
+        $down = [];
+        foreach ($this->getMigrations() as $migration) {
             if (!in_array($migration->getVersion(), $versions)) {
                 $down[] = $migration;
             }
@@ -54,8 +53,8 @@ EOT
             foreach ($down as $migration) {
                 $output->writeln(
                     sprintf(
-                        "   <error>down</error>  %14s  <comment>%s</comment>", 
-                        $migration->getVersion(), 
+                        "   <error>down</error>  %14s  <comment>%s</comment>",
+                        $migration->getVersion(),
                         $migration->getName()
                     )
                 );
@@ -69,6 +68,5 @@ EOT
         return 0;
     }
 }
-
 
 
