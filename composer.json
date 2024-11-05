@@ -1,12 +1,12 @@
 {
-  "name": "izniburak/nur-migration",
+  "name": "diegonalvarez/nur-migration",
   "type": "library",
   "description": "Simple migrations system for php",
   "keywords": [
     "migrations",
     "database migrations"
   ],
-  "homepage": "https://github.com/izniburak/nur-migration",
+  "homepage": "https://github.com/diegonalvarez/nur-migration",
   "license": "MIT",
   "authors": [
     {
