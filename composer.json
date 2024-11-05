@@ -36,5 +36,6 @@
     "psr-4": {
       "Phpmig\\": "src/Phpmig"
     }
-  }
+  },
+  "bin": ["bin/phpmig"]
 }
