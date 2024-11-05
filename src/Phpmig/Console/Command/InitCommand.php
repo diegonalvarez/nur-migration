@@ -44,7 +44,7 @@ EOT
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $cwd = getcwd();
         $bootstrap = $cwd . DIRECTORY_SEPARATOR . 'phpmig.php';
@@ -54,7 +54,7 @@ EOT
         $this->initMigrationsDir($migrations, $output);
         $this->initBootstrap($bootstrap, $relative, $output);
 
-        return 0;
+        return 0; // Retorna un entero como lo requiere Symfony Console
     }
 
     /**
